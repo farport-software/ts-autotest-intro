@@ -1,14 +1,16 @@
 import {PaymentRequest} from "../models/pay.model";
 
 export const BEARER_TOKEN = 'AKCEAW5AlcsCuduXxqWFX5N38-KcRz-OAtkCbHWYPRhs6pnkeLSQ-50=';
-export const AMEX = '372688581899681';
+export const CARD_NUMBER = '4242 4242 4242 4242';
 export const EXPIRY_DATE = '02/28';
 export const CVV = '444';
 export const CARD_HOLDER = 'Pippo Rossi';
 export const PAYMENT_API = 'https://api-tspaydev.tspay.app/orders/link2pay';
 export const GET_CHARGE = 'https://api-tspaydev.tspay.app/charges/orders/';
 export const ACTIVE = 'active';
-export const AMOUNT = "1000";
+export const AMOUNT = '1000';
+export const RECIPT_TITLE = 'RIEPILOGO OPERAZIONE';
+export const RECIPT_STATE_SUCCESS = 'Eseguita';
 
 export const BODY: PaymentRequest = {
     externalRef: '20/01/2025',
