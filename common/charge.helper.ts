@@ -14,6 +14,5 @@ export async function getChargeOrder(request: APIRequestContext, orderKey: strin
             `Errore nella GET charge order: ${response.status()} - ${await response.text()}`
         );
     }
-    const json = await response.json();
-    return json.data[0];
+    return await response.json();
 }

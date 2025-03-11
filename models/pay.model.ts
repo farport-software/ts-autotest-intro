@@ -1,4 +1,4 @@
-export interface PaymentRequest {
+export interface Link2payRequest {
     externalRef: string;
     metadata: { payload: string; };
     template: { title: string; desc: string; paymentRef: string; };
@@ -8,7 +8,7 @@ export interface PaymentRequest {
     sourceTypes: string[];
 }
 
-export interface PaymentResponse {
+export interface Link2payResponse {
     orderKey: string;
     url: string;
 }

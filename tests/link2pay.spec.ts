@@ -1,26 +1,26 @@
 import {expect, test} from "@playwright/test";
-import {createPaymentOrder} from "../common/pay.helper";
+import {createLink2pay} from "../common/pay.helper";
 import {ACTIVE, AMOUNT, BEARER_TOKEN, BODY, CARD_HOLDER, CARD_NUMBER, CVV, ESEGUITA, EXPIRY_DATE, PAGAMENTO, PAYMENT_URL} from "../common/constants";
 import * as fs from "node:fs";
 import {getChargeOrder} from "../common/charge.helper";
 import {formatAmount, formatedExpiryDate, parsePdfToModel} from "../common/pdf.helper";
 
 
-test.describe.serial('Payment and Charge Order Flow',() =>{
+test.describe.serial('Link2pay and Charge Order Flow',() =>{
     let orderKey: string;
     let chargeKey: string;
     let paymentUrl: string;
     const pdfPath = `./recipts/ricevuta_${Date.now()}.pdf`;
 
     /**
-     * Test 1: Create Order
+     * Test 1: Create Link2pay Order
      *
      * Creates a payment order via API and check the orderKey and paymentUrl.
      *
      * @param APIRequestContext request - The API request context provided by Playwright.
      */
-    test('1. Create Order', async ({ request }) => {
-        const response =await createPaymentOrder(request, BODY, BEARER_TOKEN);
+    test('1. Create Link2pay Order', async ({ request }) => {
+        const response =await createLink2pay(request, BODY, BEARER_TOKEN);
         orderKey = response.orderKey;
         paymentUrl = response.url;
         console.log(`Order Created -> orderKey: ${orderKey} | Payment URL: ${paymentUrl}`);
@@ -29,7 +29,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
     });
 
     /**
-     * Test 2: Payment Test
+     * Test 2: Link2pay Payment Test
      *
      * Navigates to the payment URL, fills in the card details,
      * and triggers the payment process. Once payment is confirmed,
@@ -37,7 +37,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
      *
      * @param Page page - The Playwright page object.
      */
-    test('2. Payment Test', async ({ page }) => {
+    test('2. Link2pay Payment Test', async ({ page }) => {
         await page.goto(paymentUrl);
 
         await page.locator('#cardholderName').fill(CARD_HOLDER);
@@ -79,11 +79,12 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
     test('3. Get Charge Key Test', async ({ request }) => {
         expect(orderKey).toBeTruthy();
         const response = await getChargeOrder(request, orderKey, BEARER_TOKEN)
-        console.log(`Charge Order Retrieved -> chargeKey: ${response.chargeKey} | State: ${response.state} | Amount: ${response.amount}`);
-        expect(response.chargeKey).toBeTruthy();
-        expect(response.state).toBe(ACTIVE);
-        expect(response.amount).toBe(AMOUNT);
-        chargeKey = response.chargeKey;
+        const res = response.data[0];
+        console.log(`Charge Order Retrieved -> chargeKey: ${res.chargeKey} | State: ${res.state} | Amount: ${res.amount}`);
+        expect(res.chargeKey).toBeTruthy();
+        expect(res.state).toBe(ACTIVE);
+        expect(res.amount).toBe(AMOUNT);
+        chargeKey = res.chargeKey;
     });
 
     /**
