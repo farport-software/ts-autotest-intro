@@ -66,10 +66,10 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
 
         const dataBuffer = fs.readFileSync(pdfPath);
         await pdfjs(dataBuffer).then((data) =>{
-            // console.log('PDF TEXT: ',data.text);
-            // console.log('PDF INFO: ',data.info);
-            // console.log('PDF METADATA: ',data.metadata);
-            // console.log('PDF NUMBER PAGES: ', data.numpages);
+            console.log('PDF TEXT: ',data.text);
+            console.log('PDF INFO: ',data.info);
+            console.log('PDF METADATA: ',data.metadata);
+            console.log('PDF NUMBER PAGES: ', data.numpages);
             expect(data.text).toContain(RECIPT_TITLE);
             expect(data.text).toContain(RECIPT_STATE_SUCCESS);
             expect(data.numpages).toEqual(1);
