@@ -23,7 +23,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
         const response =await createPaymentOrder(request, BODY, BEARER_TOKEN);
         orderKey = response.orderKey;
         paymentUrl = response.url;
-        console.log('orderKey: ',orderKey,' | url: ',paymentUrl);
+        console.log(`Order Created -> orderKey: ${orderKey} | Payment URL: ${paymentUrl}`);
         expect(orderKey).toBeTruthy();
         expect(paymentUrl).toContain(PAYMENT_URL);
     });
@@ -65,7 +65,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
 
         const fileExists = fs.existsSync(pdfPath);
         expect(fileExists).toBe(true);
-        console.log('PDF scaricato in:', pdfPath);
+        console.log(`PDF downloaded -> Path: ${pdfPath}`);
     });
 
     /**
@@ -79,7 +79,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
     test('3. Get Charge Key Test', async ({ request }) => {
         expect(orderKey).toBeTruthy();
         const response = await getChargeOrder(request, orderKey, BEARER_TOKEN)
-        console.log('chargeKey: ',response.chargeKey,' | state: ',response.state,' | amount: ', response.amount );
+        console.log(`Charge Order Retrieved -> chargeKey: ${response.chargeKey} | State: ${response.state} | Amount: ${response.amount}`);
         expect(response.chargeKey).toBeTruthy();
         expect(response.state).toBe(ACTIVE);
         expect(response.amount).toBe(AMOUNT);
@@ -112,7 +112,7 @@ test.describe.serial('Payment and Charge Order Flow',() =>{
         const today = new Date().toLocaleDateString('it-IT');
         expect(pdfModel.operationDate).toBe(today);
 
-        console.log('Recipt Transaction Code: ', pdfModel.transactionCode, ' | chargeKey: ', chargeKey);
+        console.log(`Recipt Analysis -> Transaction Code: ${pdfModel.transactionCode} | ChargeKey: ${chargeKey}`);
         expect(pdfModel.transactionCode).toBe(chargeKey);
 
         expect(pdfModel.state).toContain(ESEGUITA);

@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/farport-software/ts-autotest-intro.git",
-  "author": "blvckvnic0rn <robvolpe26@gmail.com>",
+  "author": "rob2610 <roberto.volpe@farport.co>",
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.51.0",
     "@types/node": "^22.13.10"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "yarn playwright test",
+    "test:chrome": "yarn playwright test --project=chromium",
+    "test:firefox": "yarn playwright test --project=firefox",
+    "test:webkit": "yarn playwright test --project=webkit"
+  },
   "dependencies": {
     "@types/pdf-parse": "^1.1.4",
     "pdf-parse": "^1.1.1"
