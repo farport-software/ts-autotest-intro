@@ -9,9 +9,9 @@ export const PAYMENT_API = 'https://api-tspaydev.tspay.app/orders/link2pay';
 export const GET_CHARGE = 'https://api-tspaydev.tspay.app/charges/orders/';
 export const ACTIVE = 'active';
 export const AMOUNT = '1000';
-export const RECIPT_TITLE = 'RIEPILOGO OPERAZIONE';
-export const RECIPT_STATE_SUCCESS = 'Eseguita';
-
+export const PAGAMENTO = 'Pagamento';
+export const ESEGUITA = 'Eseguita';
+export const PAYMENT_URL ='https://secure-tspaydev.tspay.app/link2Pay/';
 export const BODY: PaymentRequest = {
     externalRef: '20/01/2025',
     metadata: {payload: '{"message": "This is encoded"}'},
