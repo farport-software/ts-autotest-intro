@@ -16,7 +16,7 @@ interface ChargeOrder {
     fees: Fees;
     upstreamStatus: string;
     order: Order;
-    chargeRequest: Record<string, any>;
+    chargeRequest: string;
     modifiedOn: string;
     createdOn: string;
 }

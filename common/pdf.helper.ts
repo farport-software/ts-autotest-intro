@@ -98,7 +98,7 @@ export function formatedExpiryDate(expiry: string): string {
  * with two decimals, replacing the decimal point with a comma, and appending ' €'.
  *
  * @param {number} amount - The amount in cents.
- * @returns {string} The formatted amount (e.g., "10,00 €").
+ * @returns {string} The formatted amount (es. "10,00 €").
  */
 export function formatAmount(amount: number): string {
     const euros = (amount / 100).toFixed(2);
