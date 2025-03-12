@@ -78,13 +78,13 @@ test.describe.serial('Link2pay and Charge Order Flow',() =>{
      */
     test('3. Get Charge Key Test', async ({ request }) => {
         expect(orderKey).toBeTruthy();
-        const response = await getChargeOrder(request, orderKey, BEARER_TOKEN)
-        const res = response.data[0];
-        console.log(`Charge Order Retrieved -> chargeKey: ${res.chargeKey} | State: ${res.state} | Amount: ${res.amount}`);
-        expect(res.chargeKey).toBeTruthy();
-        expect(res.state).toBe(ACTIVE);
-        expect(res.amount).toBe(AMOUNT);
-        chargeKey = res.chargeKey;
+        const chargeOrderResponse = await getChargeOrder(request, orderKey, BEARER_TOKEN)
+        const response = chargeOrderResponse.data[0];
+        console.log(`Charge Order Retrieved -> chargeKey: ${response.chargeKey} | State: ${response.state} | Amount: ${response.amount}`);
+        expect(response.chargeKey).toBeTruthy();
+        expect(response.state).toBe(ACTIVE);
+        expect(response.amount).toBe(AMOUNT);
+        chargeKey = response.chargeKey;
     });
 
     /**
@@ -117,5 +117,25 @@ test.describe.serial('Link2pay and Charge Order Flow',() =>{
         expect(pdfModel.transactionCode).toBe(chargeKey);
 
         expect(pdfModel.state).toContain(ESEGUITA);
+    })
+
+
+    test('5. Link2Pay Payment test with invalid payment method ', async ({page}) => {
+        await page.goto(paymentUrl);
+        await page.locator('#cardholderName').fill(CARD_HOLDER);
+
+        const cardNumberFrame = page.frameLocator('#cardNumber');
+        await cardNumberFrame.locator('input[name="cardnumber"]').fill('0000000000000000000');
+
+        const expiryFrame = page.frameLocator('#expiryDate');
+        await expiryFrame.locator('#checkout-frames-expiry-date').fill('12/20');
+
+        const cvvFrame = page.frameLocator('#cvv');
+        await cvvFrame.locator('#checkout-frames-cvv').fill('00');
+
+        await expect(page.locator('span[aria-hidden="true"]', { hasText: 'Carta non è supportato' })).toBeVisible();
+        await expect(page.locator('span[aria-hidden="true"]',{hasText: 'La data di scadenza è nel passato'})).toBeVisible();
+        const errors= await page.locator('span[aria-hidden="true"]').allInnerTexts();
+        console.log('All errors alerts:', errors);
     })
 })
