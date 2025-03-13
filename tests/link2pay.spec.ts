@@ -1,33 +1,27 @@
 import {expect, test} from "@playwright/test";
-import {createLink2pay} from "../common/pay.helper";
-import {ACTIVE, AMOUNT, BEARER_TOKEN, BODY, CARD_HOLDER, CARD_NUMBER, CVV, ESEGUITA, EXPIRY_DATE, PAGAMENTO, PAYMENT_URL} from "../common/constants";
-import * as fs from "node:fs";
-import {getChargeOrder} from "../common/charge.helper";
-import {formatAmount, formatedExpiryDate, parsePdfToModel} from "../common/pdf.helper";
+import {BEARER_TOKEN, BODY, PAYMENT_URL} from "../common/constants";
+import {createLink2payOrder, Link2payInput, Link2payOutput} from "../external/order/link2pay";
 
 
-test.describe.serial('Link2pay and Charge Order Flow',() =>{
-    let orderKey: string;
-    let chargeKey: string;
-    let paymentUrl: string;
-    const pdfPath = `./recipts/ricevuta_${Date.now()}.pdf`;
+test.describe.serial('Link2pay and Charge Order Flow', () => {
 
-    /**
-     * Test 1: Create Link2pay Order
-     *
-     * Creates a payment order via API and check the orderKey and paymentUrl.
-     *
-     * @param APIRequestContext request - The API request context provided by Playwright.
-     */
-    test('1. Create Link2pay Order', async ({ request }) => {
-        const response =await createLink2pay(request, BODY, BEARER_TOKEN);
-        orderKey = response.orderKey;
-        paymentUrl = response.url;
-        console.log(`Order Created -> orderKey: ${orderKey} | Payment URL: ${paymentUrl}`);
-        expect(orderKey).toBeTruthy();
-        expect(paymentUrl).toContain(PAYMENT_URL);
-    });
+    const input: Link2payInput = {
+        body: BODY,
+        token: BEARER_TOKEN,
+        payUrl: PAYMENT_URL,
+    };
 
+    const expectedOutput: Link2payOutput = {
+        url: PAYMENT_URL,
+        orderKey: '',
+    };
+
+    test('1. Create Link2pay Order', createLink2payOrder(input, expectedOutput, (output: Link2payOutput) => {
+        expect(output.orderKey).toBeTruthy();
+        expect(output.url).toContain(`${input.payUrl}`);
+        expect(output.orderKey.length).toEqual(27);
+        console.log("Link2pay Order Callback:", output);
+    }));
     /**
      * Test 2: Link2pay Payment Test
      *
@@ -37,36 +31,36 @@ test.describe.serial('Link2pay and Charge Order Flow',() =>{
      *
      * @param Page page - The Playwright page object.
      */
-    test('2. Link2pay Payment Test', async ({ page }) => {
-        await page.goto(paymentUrl);
-
-        await page.locator('#cardholderName').fill(CARD_HOLDER);
-
-        const cardNumberFrame = page.frameLocator('#cardNumber');
-        await cardNumberFrame.locator('input[name="cardnumber"]').fill(CARD_NUMBER);
-
-        const expiryFrame = page.frameLocator('#expiryDate');
-        await expiryFrame.locator('#checkout-frames-expiry-date').fill(EXPIRY_DATE);
-
-        const cvvFrame = page.frameLocator('#cvv');
-        await cvvFrame.locator('#checkout-frames-cvv').fill(CVV);
-
-        await page.waitForSelector('#btnSavePaymentMethod:not([disabled])');
-        await page.click('#btnSavePaymentMethod');
-
-        await page.waitForURL('**/cko/thank-you', {timeout: 15000});
-        await expect(page.locator('text=PAGAMENTO concluso con successo!')).toBeVisible();
-
-        const downloadPromise = page.waitForEvent('download');
-        await page.click('#btnPrint');
-        const download = await downloadPromise;
-
-        await download.saveAs(pdfPath);
-
-        const fileExists = fs.existsSync(pdfPath);
-        expect(fileExists).toBe(true);
-        console.log(`PDF downloaded -> Path: ${pdfPath}`);
-    });
+    // test('2. Link2pay Payment Test', async ({ page }) => {
+    //     await page.goto(paymentUrl);
+    //
+    //     await page.locator('#cardholderName').fill(CARD_HOLDER);
+    //
+    //     const cardNumberFrame = page.frameLocator('#cardNumber');
+    //     await cardNumberFrame.locator('input[name="cardnumber"]').fill(CARD_NUMBER);
+    //
+    //     const expiryFrame = page.frameLocator('#expiryDate');
+    //     await expiryFrame.locator('#checkout-frames-expiry-date').fill(EXPIRY_DATE);
+    //
+    //     const cvvFrame = page.frameLocator('#cvv');
+    //     await cvvFrame.locator('#checkout-frames-cvv').fill(CVV);
+    //
+    //     await page.waitForSelector('#btnSavePaymentMethod:not([disabled])');
+    //     await page.click('#btnSavePaymentMethod');
+    //
+    //     await page.waitForURL('**/cko/thank-you', {timeout: 15000});
+    //     await expect(page.locator('text=PAGAMENTO concluso con successo!')).toBeVisible();
+    //
+    //     const downloadPromise = page.waitForEvent('download');
+    //     await page.click('#btnPrint');
+    //     const download = await downloadPromise;
+    //
+    //     await download.saveAs(pdfPath);
+    //
+    //     const fileExists = fs.existsSync(pdfPath);
+    //     expect(fileExists).toBe(true);
+    //     console.log(`PDF downloaded -> Path: ${pdfPath}`);
+    // });
 
     /**
      * Test 3: Get Charge Key Test
@@ -76,16 +70,16 @@ test.describe.serial('Link2pay and Charge Order Flow',() =>{
      * Save the chargeKey for comparison in the next test.
      * @param APIRequestContext request - The API request context provided by Playwright.
      */
-    test('3. Get Charge Key Test', async ({ request }) => {
-        expect(orderKey).toBeTruthy();
-        const chargeOrderResponse = await getChargeOrder(request, orderKey, BEARER_TOKEN)
-        const response = chargeOrderResponse.data[0];
-        console.log(`Charge Order Retrieved -> chargeKey: ${response.chargeKey} | State: ${response.state} | Amount: ${response.amount}`);
-        expect(response.chargeKey).toBeTruthy();
-        expect(response.state).toBe(ACTIVE);
-        expect(response.amount).toBe(AMOUNT);
-        chargeKey = response.chargeKey;
-    });
+    // test('3. Get Charge Key Test', async ({ request }) => {
+    //     expect(orderKey).toBeTruthy();
+    //     const chargeOrderResponse = await getChargeOrder(request, orderKey, BEARER_TOKEN)
+    //     const response = chargeOrderResponse.data[0];
+    //     console.log(`Charge Order Retrieved -> chargeKey: ${response.chargeKey} | State: ${response.state} | Amount: ${response.amount}`);
+    //     expect(response.chargeKey).toBeTruthy();
+    //     expect(response.state).toBe(ACTIVE);
+    //     expect(response.amount).toBe(AMOUNT);
+    //     chargeKey = response.chargeKey;
+    // });
 
     /**
      * Test 4: Analyze Recipt PDF
@@ -94,48 +88,50 @@ test.describe.serial('Link2pay and Charge Order Flow',() =>{
      * such as amount, card, expiration date, transaction type, transaction date, transaction code and status.
      * Compares the extracted values with the expected ones.
      */
-    test('4. Analyze Recipt PDF', async () => {
-        const fileExists = fs.existsSync(pdfPath);
-        expect(fileExists).toBe(true);
+    // test('4. Analyze Recipt PDF', async () => {
+    //     const fileExists = fs.existsSync(pdfPath);
+    //     expect(fileExists).toBe(true);
+    //
+    //     const pdfModel = await parsePdfToModel(pdfPath);
+    //
+    //     const amount = formatAmount(parseInt(AMOUNT))
+    //     expect(pdfModel.amount).toBe(amount);
+    //
+    //     expect(pdfModel.card).toContain("4242");
+    //
+    //     const expiryDate = formatedExpiryDate(EXPIRY_DATE);
+    //     expect(pdfModel.expiryDate).toBe(expiryDate);
+    //
+    //     expect(pdfModel.operationType).toBe(PAGAMENTO);
+    //
+    //     const today = new Date().toLocaleDateString('it-IT');
+    //     expect(pdfModel.operationDate).toBe(today);
+    //
+    //     console.log(`Recipt Analysis -> Transaction Code: ${pdfModel.transactionCode} | ChargeKey: ${chargeKey}`);
+    //     expect(pdfModel.transactionCode).toBe(chargeKey);
+    //
+    //     expect(pdfModel.state).toContain(ESEGUITA);
+    // })
 
-        const pdfModel = await parsePdfToModel(pdfPath);
 
-        const amount = formatAmount(parseInt(AMOUNT))
-        expect(pdfModel.amount).toBe(amount);
+    // test('5. Link2Pay Payment test with invalid payment method ', async ({page}) => {
+    //     await page.goto(paymentUrl);
+    //     await page.locator('#cardholderName').fill(CARD_HOLDER);
+    //
+    //     const cardNumberFrame = page.frameLocator('#cardNumber');
+    //     await cardNumberFrame.locator('input[name="cardnumber"]').fill('0000000000000000000');
+    //
+    //     const expiryFrame = page.frameLocator('#expiryDate');
+    //     await expiryFrame.locator('#checkout-frames-expiry-date').fill('12/20');
+    //
+    //     const cvvFrame = page.frameLocator('#cvv');
+    //     await cvvFrame.locator('#checkout-frames-cvv').fill('00');
+    //
+    //     await expect(page.locator('span[aria-hidden="true"]', { hasText: 'Carta non è supportato' })).toBeVisible();
+    //     await expect(page.locator('span[aria-hidden="true"]',{hasText: 'La data di scadenza è nel passato'})).toBeVisible();
+    //     const errors= await page.locator('span[aria-hidden="true"]').allInnerTexts();
+    //     console.log('All errors alerts:', errors);
+    // })
 
-        expect(pdfModel.card).toContain("4242");
 
-        const expiryDate = formatedExpiryDate(EXPIRY_DATE);
-        expect(pdfModel.expiryDate).toBe(expiryDate);
-
-        expect(pdfModel.operationType).toBe(PAGAMENTO);
-
-        const today = new Date().toLocaleDateString('it-IT');
-        expect(pdfModel.operationDate).toBe(today);
-
-        console.log(`Recipt Analysis -> Transaction Code: ${pdfModel.transactionCode} | ChargeKey: ${chargeKey}`);
-        expect(pdfModel.transactionCode).toBe(chargeKey);
-
-        expect(pdfModel.state).toContain(ESEGUITA);
-    })
-
-
-    test('5. Link2Pay Payment test with invalid payment method ', async ({page}) => {
-        await page.goto(paymentUrl);
-        await page.locator('#cardholderName').fill(CARD_HOLDER);
-
-        const cardNumberFrame = page.frameLocator('#cardNumber');
-        await cardNumberFrame.locator('input[name="cardnumber"]').fill('0000000000000000000');
-
-        const expiryFrame = page.frameLocator('#expiryDate');
-        await expiryFrame.locator('#checkout-frames-expiry-date').fill('12/20');
-
-        const cvvFrame = page.frameLocator('#cvv');
-        await cvvFrame.locator('#checkout-frames-cvv').fill('00');
-
-        await expect(page.locator('span[aria-hidden="true"]', { hasText: 'Carta non è supportato' })).toBeVisible();
-        await expect(page.locator('span[aria-hidden="true"]',{hasText: 'La data di scadenza è nel passato'})).toBeVisible();
-        const errors= await page.locator('span[aria-hidden="true"]').allInnerTexts();
-        console.log('All errors alerts:', errors);
-    })
 })

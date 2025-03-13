@@ -13,6 +13,7 @@ export const AMOUNT = '1000';
 export const PAGAMENTO = 'Pagamento';
 export const ESEGUITA = 'Eseguita';
 export const PAYMENT_URL ='https://secure-tspaydev.tspay.app/link2Pay/';
+export const PDF = `./recipts/ricevuta_${Date.now()}.pdf`;
 export const BODY: Link2payRequest = {
     externalRef: '20/01/2025',
     metadata: {payload: '{"message": "This is encoded"}'},
@@ -20,5 +21,5 @@ export const BODY: Link2payRequest = {
     currency: 'EUR',
     amount: 1000,
     langLocale: 'it-IT',
-    sourceTypes: ['card'],
+    sourceTypes: ['card', 'sepa_debit'],
 };
