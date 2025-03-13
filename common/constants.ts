@@ -3,6 +3,8 @@ import {Link2payRequest} from "../models/pay.model";
 
 export const BEARER_TOKEN = 'AKCEAW5AlcsCuduXxqWFX5N38-KcRz-OAtkCbHWYPRhs6pnkeLSQ-50=';
 export const CARD_NUMBER = '4242 4242 4242 4242';
+export const IBAN = 'IT40S0542811101000000123456'
+export const EMAIL = 'pippo.rossi@mail.com'
 export const EXPIRY_DATE = '02/28';
 export const CVV = '444';
 export const CARD_HOLDER = 'Pippo Rossi';
